@@ -1,6 +1,6 @@
 # COMPLAINTS-US-001 · Register and look up complaints against automated decisions
 
-> **COMPLAINTS-US-001** · state **Confirmed** · traces to [COMPLAINTS.01](../specifications/COMPLAINTS.01-complaint-register.md)
+> **COMPLAINTS-US-001** · state **Implemented** · traces to [COMPLAINTS.01](../specifications/COMPLAINTS.01-complaint-register.md)
 
 **As** a complaints officer of a public authority
 **I want** a register of complaints lodged against automated decisions, each with
