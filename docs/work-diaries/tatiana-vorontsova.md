@@ -276,3 +276,50 @@ Time spent: __ h
 
 - There is no navigation menu in the template: `/complaints` is reached by
   its address, like `/animals`. `main.tsx` is not ours to change.
+
+### Stage 6 — end-to-end run from a clean database (22 November)
+
+**Work completed**
+
+- Merged PRs #1–#5 into `main` of my fork in order; every stage commit,
+  including the red `1bb0750`, is in `main`.
+- On `main`: `scripts/check-changesets` clean, `npx tsc -b` clean,
+  `./gradlew test --rerun` 12/12 (forced past Gradle's cache, so the tests
+  really ran).
+- `scripts/reset-db`, then the backend from nothing: all six complaints
+  changesets applied, demo rows only under `context:demo` (4 decision types,
+  4 complaints, 5 handling steps); the animals example intact (3 animals).
+- In the browser, business test 2 end to end: a used case number refused with
+  "an active complaint with case number CMP-2026-0001 already exists" (409);
+  CMP-E2E-0001 registered, withdrawn, and registered again; in the database
+  the first row stays with `sys_status = 'C'`. The other flows were clicked
+  through in stage 5 on the same code.
+- Specification checked against the code section by section: no
+  contradiction; five things the code does that the text did not say were
+  added (sources in the header; 409 on a race; where the registry URL is set
+  and how to see fail open; the list's default order; that the registration
+  form allows a future date on purpose while the page's `DateField` does
+  not). User story and specification: Confirmed → **Implemented**. All six
+  acceptance criteria are met.
+
+**What I asked the agent**
+
+- To prove the merged `main` works from an empty database, and to bring the
+  documents in line with what was built.
+
+**What the agent got wrong, and how it was corrected**
+
+- When I first said the PRs were merged, they were not — only the merge
+  dialog had been opened. The agent checked GitHub before starting rather
+  than assuming, and explained the remaining clicks; but its earlier
+  instruction "then #2, #3, #4 and #5 the same way" was too terse to follow
+  without links. Fixed by listing each PR with its link.
+- The first test run on `main` finished in 20 s; the agent noticed this was
+  Gradle's cache, not a test run, and repeated it with `--rerun`.
+
+**Open**
+
+- The legal reference in the story's Context (GDPR Art. 22(3)) is still not
+  checked against the regulation's text — before the defence.
+- Hours per day still to fill in.
+- Next, agreed: my own visual theme, as a separate PR after this one.

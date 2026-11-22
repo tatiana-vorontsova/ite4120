@@ -1,7 +1,7 @@
 # COMPLAINTS.01 · Complaint register
 
-> **COMPLAINTS.01** · state **Confirmed** · traces from [COMPLAINTS-US-001](../user-stories/COMPLAINTS-US-001.md)
-> · source `backend/src/main/java/ee/taltech/ite4120/complaints/`, `backend/src/main/resources/complaints/db/changelog/`, `frontend/src/pages/`
+> **COMPLAINTS.01** · state **Implemented** · traces from [COMPLAINTS-US-001](../user-stories/COMPLAINTS-US-001.md)
+> · source `backend/src/main/java/ee/taltech/ite4120/complaints/`, `backend/src/main/resources/complaints/db/changelog/`, `frontend/src/pages/`, `frontend/src/api.ts`, `frontend/src/App.tsx`
 
 ## Description
 
@@ -50,7 +50,7 @@ stored.
 | --- | --- | --- |
 | `GET /api/complaints` | paged search: `textContains` (subject or case number), `decisionTypeCode`, `limit`, `offset`, `sort` (`subject`, `caseNumber`, `decisionDate`) | 400 unknown sort key |
 | `GET /api/complaints/{id}` | one active complaint | 404 |
-| `POST /api/complaints` | register; answers **201 + Location** | 400 validation · 409 duplicate case number |
+| `POST /api/complaints` | register; answers **201 + Location** | 400 validation · 409 duplicate case number (also when two registrations race — the unique index decides, never a 500) |
 | `PUT /api/complaints/{id}` | update; case number immutable — a different one in the body is refused, not ignored | 400 validation · 400 "caseNumber cannot be changed" · 404 |
 | `DELETE /api/complaints/{id}` | withdraw (soft) — **204** | 404 |
 | `GET /api/complaints/{id}/complainant` | complainant via the registry adapter | 404 complaint not found · 404 "complainant not found in the population registry" · 502 registry down |
@@ -75,11 +75,18 @@ complainant — not as a precondition for accepting the complaint. A personal
 code the registry does not know is a miss, not a failure: it answers 404 with
 its own `detail`, never 502, and never an empty 200.
 
+The registry is reached at `complaints.complainant-registry.url` — locally the
+imitated registry the animals example serves. The adapter's four outcomes
+(mapped, miss, fault, unreachable) are covered by
+`HttpComplainantRegistryAdapterTest`. To see the policy at work, start the
+backend with `COMPLAINTS_COMPLAINANTREGISTRY_URL` pointing at a closed port:
+`/complainant` answers 502, every other endpoint works.
+
 ## UI  *(→ session 4)*
 
 | Screen | Element | Component | Rules |
 | --- | --- | --- | --- |
-| Complaint list | table | `ResourceList` | columns: case number (locked, **a link to the complaint's page**), subject, decision type tag, decision date, decision reference (hidden by default); search field; row detail panel |
+| Complaint list | table | `ResourceList` | columns: case number (locked, **a link to the complaint's page**), subject, decision type tag, decision date, decision reference (hidden by default); newest decision date first; search field; row detail panel (the list's details toggle) |
 | | decision type filter | `Select` in `ResourceList`'s filter card | options from `/decision-types`; narrows the list when applied with Apply |
 | | register button | `AppButtonPrimary` | navigates to the form |
 | | detail panel | `ResourceList.detailView` | shows complainant name/address fetched via `/complainant`; on 404 a muted "not found in the population registry", on 502 a muted "population registry unavailable — complaint is unaffected" |
@@ -89,7 +96,7 @@ its own `detail`, never 502, and never an empty 200.
 | Register form | case number | `Input` | required, ≤50 |
 | | subject | `Input` | required, ≤255 |
 | | decision type | `Select` | required, options from `/decision-types` |
-| | decision date | `DatePicker` | required |
+| | decision date | `DatePicker` | required; future dates are selectable on purpose — the rule is the backend's (business test 1) and its 400 is shown verbatim. On the complaint page the `DateField` does not offer future dates, as in `AnimalDetail`; the backend checks either way |
 | | complainant code | `Input` | required, pattern `\d{11}` |
 | | decision reference | `Input` | ≤50 |
 | | submit | `AppButtonPrimary` | 400/409 problem text shown verbatim in a notification |
