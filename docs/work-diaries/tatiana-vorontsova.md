@@ -224,3 +224,55 @@ Time spent: __ h
 - The adapter tests were written together with the adapter, not before it.
   They are not business tests from the specification, so the "watched red"
   rule does not strictly apply, but they were not seen failing first.
+
+### Stage 5 — frontend (22 November)
+
+**Work completed**
+
+- `api.ts`: `complaintsApi` beside `animalsApi` — every call of the complaint
+  pages lives there. The complainant lookup returns one of three outcomes
+  (`found` / `unknown` / `unavailable`) instead of throwing, because the shared
+  `handle` would turn 404 and 502 into the same Error and the UI must tell
+  them apart.
+- `App.tsx`: three routes, `/complaints`, `/complaints/new`, `/complaints/:id`.
+- Pages in the shape of the animals ones: `ComplaintList` (`ResourceList`,
+  search, decision-type filter card with Apply, register button, detail
+  panel), `ComplaintCreate` (antd form, every input a library component),
+  `ComplaintDetail` (`ResourceForm` + `useDataController`, sections Identity
+  and Contested decision, the `DateField` wrapper for the known date-field
+  crash, Withdraw with confirmation, metadata sidebar), and
+  `ComplainantLine`, which renders the three registry outcomes in the words
+  of the specification.
+- Checked: `npx tsc -b` clean, production build passes. In the browser: list
+  and sort; filter TAX → one row; detail panel with Jaan Tamm, and with "not
+  found in the population registry" for CMP-2026-0004; registration with a
+  future date → "Registration failed: decisionDate must not be in the
+  future", verbatim from the backend; registration with a past date →
+  saved; record page with Mari Kask from the registry; edit of the date and
+  reference → saved, version 2; withdraw → gone from the list. Then the
+  backend restarted with the registry unreachable: the record page opened
+  and showed "population registry unavailable — complaint is unaffected".
+
+**What I asked the agent**
+
+- To build the three screens and click through every flow in the browser,
+  including the registry being down.
+
+**What the agent got wrong, and how it was corrected**
+
+- The first `npx tsc -b` failed: a `useEffect` in the list returned a
+  cleanup on one path only (`noImplicitReturns`). Fixed before anything else
+  ran.
+- The detail panel did not appear in the browser; the agent first assumed
+  the preview window was too narrow and widened it — wrong. The panel is
+  switched on by the list's "Toggle details panel" (eye) button, in the
+  animals list as well. Found by reading the page's controls.
+- Filling the form by keyboard picked the wrong decision type and did not
+  commit the date at first (agent's input, not the form's fault — the form
+  rightly refused to submit). Redone by clicking the option and committing
+  the date with Tab.
+
+**Not in scope, noticed**
+
+- There is no navigation menu in the template: `/complaints` is reached by
+  its address, like `/animals`. `main.tsx` is not ours to change.
