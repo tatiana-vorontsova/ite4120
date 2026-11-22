@@ -84,22 +84,34 @@ backend with `COMPLAINTS_COMPLAINANTREGISTRY_URL` pointing at a closed port:
 
 ## UI  *(→ session 4)*
 
+**Theme: TEDI** (`VITE_THEME=tedi` in `frontend/.env`), the design system of TEHIK for the Estonian
+public sector, built into `@helex/ui`. A register of complaints against public-sector decisions is a
+public-sector service, so it takes the public sector's visual language: Roboto, the TEDI blue as brand
+colour, semantic success / warning / error / info colours, larger controls. The theme is global — the
+animals example takes it too. Every colour on the complaint screens comes from the theme through a
+component prop (`AppTag color`, `AppBadge status`, `AppAlert type`, `AppTypography.Text type`); no hex
+codes. `main.tsx` changes in one line only, the tab title (below).
+
 | Screen | Element | Component | Rules |
 | --- | --- | --- | --- |
-| Complaint list | table | `ResourceList` | columns: case number (locked, **a link to the complaint's page**), subject, decision type tag, decision date, decision reference (hidden by default); newest decision date first; search field; row detail panel (the list's details toggle) |
+| All | navigation | `AppNavMenu` (horizontal) inside `AppLayout`, in `App.tsx` | entries Complaints (first; `/` opens it) and Animals (the course's worked example, kept beside it for comparison); the active one follows the first path segment, so a record page keeps its register highlighted |
+| | browser tab title | `AppRoot` `appName` in `main.tsx`, and `<title>` in `index.html` | "ITE4120 Registers" — neutral for both registers. The one line of `main.tsx` this component changes |
+| Complaint list | heading | `ResourceList` `title` with `AppTypography.Text type="secondary"` | "Complaints", and under it one line: the count of active complaints ("· matching" when searched or filtered), then what the register is. The count leads, so a narrow header trims the description, not the number |
+| | table | `ResourceList` | columns: case number (locked, **a link to the complaint's page**), subject, decision type tag, decision date, decision reference (hidden by default); newest decision date first; search field; row detail panel (the list's details toggle) |
+| | decision type tag | `AppTag` with `color` | one theme colour per type: PERMIT `processing` (brand), BENEFIT `success`, TAX `warning`, RISK_SCORE `error`; an unknown code `default`. Only antd's status colours are theme tokens — the named presets (`blue`, `cyan`…) are antd's generic palette and are not used. Same tag on the list, the detail panel and the page header |
 | | decision type filter | `Select` in `ResourceList`'s filter card | options from `/decision-types`; narrows the list when applied with Apply |
 | | register button | `AppButtonPrimary` | navigates to the form |
-| | detail panel | `ResourceList.detailView` | shows complainant name/address fetched via `/complainant`; on 404 a muted "not found in the population registry", on 502 a muted "population registry unavailable — complaint is unaffected" |
+| | detail panel | `ResourceList.detailView` | the complainant's name and address via `/complainant`; otherwise an `AppBadge` with the registry outcome (below) |
 | Complaint page `/complaints/{id}` | view / edit | `ResourceForm` + `useDataController` | sections Identity (case number read-only, subject, decision type) and Contested decision (decision date, decision reference, complainant code); Edit → Save is `PUT`, Cancel restores; Withdraw is the soft `DELETE` with confirmation; Back to the list; decision date is a `custom` field (`DateField`, as in `AnimalDetail`) — the built-in `date` field crashes the picker |
-| | complainant | `ResourceForm` field, view mode | the personal code plus name and address via `/complainant`; on 404 / 502 the same muted notes as the detail panel instead of the name — the page never depends on the registry |
+| | complainant | `AppCard` in `ResourceForm.sidebar`, above the metadata | its own card: an `AppBadge` with the registry outcome, then `FieldItem`s — personal code, and when found, name and address ("looked up live — never stored"). Found: `success` "Found in the population registry". 404: `warning` "Not found in the population registry" and a warning `AppAlert` to check the code with the complainant. 502: `default` "Population registry unavailable" and an info `AppAlert` that the complaint is unaffected — fail open, readable; the page never waits for the card |
 | | metadata | `ResourceForm.sidebar` — `AppCard` of `FieldItem`s | created at / by, modified at / by, version — the platform `sys*` columns, read-only |
-| Register form | case number | `Input` | required, ≤50 |
-| | subject | `Input` | required, ≤255 |
-| | decision type | `Select` | required, options from `/decision-types` |
-| | decision date | `DatePicker` | required; future dates are selectable on purpose — the rule is the backend's (business test 1) and its 400 is shown verbatim. On the complaint page the `DateField` does not offer future dates, as in `AnimalDetail`; the backend checks either way |
-| | complainant code | `Input` | required, pattern `\d{11}` |
-| | decision reference | `Input` | ≤50 |
-| | submit | `AppButtonPrimary` | 400/409 problem text shown verbatim in a notification |
+| Register form `/complaints/new` | form | `ResourceForm` in `create` mode | **the same two sections as the complaint page** (shared definition, `complaintUi.tsx`), so registering and reading look alike; Register and Cancel in the header; field hints as tooltips |
+| | fields | as on the page | case number required, ≤50 (editable here); subject required, ≤255; decision type required; decision date required; complainant code required, pattern `\d{11}`; decision reference ≤50 |
+| | decision date | `DateField` with future dates allowed | on purpose — the rule is the backend's (business test 1) and its 400 is shown verbatim. On the complaint page the `DateField` does not offer future dates, as in `AnimalDetail`; the backend checks either way |
+| | submit | `ResourceForm` save | 400/409 problem text shown verbatim in a notification |
+
+Out of scope here, deliberately: the handling steps on screen (data only, see Excluded), any new
+endpoint.
 
 ## Business tests  *(→ executable in `ComplaintBusinessRulesIT`)*
 

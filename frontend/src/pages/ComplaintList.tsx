@@ -5,13 +5,13 @@ import { PlusOutlined } from '@ant-design/icons';
 import {
   AppButtonPrimary,
   AppLink,
-  AppTag,
+  AppTypography,
   ResourceList,
   useAppNotification,
   type ResourceListColumn,
 } from '@helex/ui';
 import { complaintsApi, type Complaint, type ComplainantLookup } from '../api';
-import { ComplainantLine } from './ComplainantLine';
+import { ComplainantStatus, DecisionTypeTag } from './complaintUi';
 
 /**
  * The complaints list (COMPLAINTS.01 § UI) on @helex/ui's ResourceList, in the
@@ -22,6 +22,7 @@ export const ComplaintList = () => {
   const navigate = useNavigate();
   const notify = useAppNotification();
   const [complaints, setComplaints] = useState<Complaint[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Complaint | null>(null);
@@ -40,7 +41,10 @@ export const ComplaintList = () => {
     setLoading(true);
     complaintsApi
       .list(text || undefined, decisionTypeCode)
-      .then((result) => setComplaints(result.data))
+      .then((result) => {
+        setComplaints(result.data);
+        setTotal(result.meta?.total ?? result.data.length);
+      })
       .catch((e) => notify.error('Could not load complaints', e.message))
       .finally(() => setLoading(false));
   }, [notify]);
@@ -85,7 +89,7 @@ export const ComplaintList = () => {
       key: 'decisionTypeCode',
       title: 'Decision type',
       dataIndex: 'decisionTypeCode',
-      render: (code: string) => <AppTag>{code}</AppTag>,
+      render: (code: string) => <DecisionTypeTag code={code} />,
     },
     { key: 'decisionDate', title: 'Decision date', dataIndex: 'decisionDate' },
     {
@@ -98,7 +102,16 @@ export const ComplaintList = () => {
 
   return (
     <ResourceList<Complaint>
-      title="Complaints"
+      title={
+        <div>
+          <div>Complaints</div>
+          {/* The count leads, so a narrow header (detail panel open) trims the description, not the number. */}
+          <AppTypography.Text type="secondary" style={{ fontWeight: 'normal' }}>
+            {total !== null && `${total} active${search || appliedType ? ' matching' : ''} · `}
+            Complaints against automated decisions — each recorded once, under its own case number
+          </AppTypography.Text>
+        </div>
+      }
       columns={columns}
       dataSource={complaints}
       rowKey="id"
@@ -136,11 +149,14 @@ export const ComplaintList = () => {
               <b>{complaint.caseNumber}</b> · {complaint.subject}
             </div>
             <div>
-              Decision: {complaint.decisionTypeCode} of {complaint.decisionDate}
+              <DecisionTypeTag code={complaint.decisionTypeCode} /> of {complaint.decisionDate}
               {complaint.decisionReference && ` · ${complaint.decisionReference}`}
             </div>
             <div>
-              Complainant: <ComplainantLine code={complaint.complainantIsikukood} lookup={lookup} />
+              <AppTypography.Text type="secondary">Complainant {complaint.complainantIsikukood}</AppTypography.Text>
+              <div>
+                <ComplainantStatus lookup={lookup} />
+              </div>
             </div>
           </div>
         ),

@@ -323,3 +323,87 @@ Time spent: __ h
   checked against the regulation's text — before the defence.
 - Hours per day still to fill in.
 - Next, agreed: my own visual theme, as a separate PR after this one.
+
+### Design stage — TEDI theme and screen polish (22 November)
+
+Time spent: __ h
+
+**What I asked the agent**
+
+- Switch the theme from TalTech to TEDI (TEHIK's design system for the
+  Estonian public sector, built into `@helex/ui`), check every screen — ours
+  and animals — and stop rather than patch the theme with CSS if it looked
+  broken.
+- Polish the complaint screens with library components only, colours only
+  from the theme, `main.tsx` untouched: a description and a count under the
+  list title; one colour per decision type; the complainant as its own card
+  with a found / unknown / unavailable badge, fail open readable at a glance;
+  the registration form with the same sections as the complaint page; a
+  neutral browser-tab title; navigation between Animals and Complaints.
+- References for composition, not pixels: TEDI and Helex Storybooks, Ant
+  Design Pro profile page, GOV.UK summary list, Attio record page.
+- Not to add the handling-step timeline or any endpoint.
+
+**Work completed**
+
+- `frontend/.env`: `VITE_THEME=tedi`. Checked before touching any screen:
+  Roboto loaded by the library, TEDI blue, DatePicker, notifications, the
+  metadata sidebar — not broken.
+- `App.tsx`: `AppLayout` + horizontal `AppNavMenu` (Animals | Complaints)
+  around the routes — no `main.tsx` change.
+- `pages/complaintUi.tsx` (new, shared): decision-type tag colours from the
+  theme's status colours (PERMIT brand, BENEFIT success, TAX warning,
+  RISK_SCORE error); the `DateField`; the Identity / Contested decision
+  sections used by both the page and the form; the complainant badge and
+  card. Replaces `ComplainantLine.tsx`.
+- List: count and one-line description under the title; coloured tags.
+- Complaint page: complainant card in the sidebar above the metadata, with
+  `FieldItem`s like the metadata card; warning alert on 404, calm info alert
+  on 502.
+- Registration form: `ResourceForm` in `create` mode with the shared sections.
+- Muted notes now `AppTypography.Text type="secondary"` (theme colour)
+  instead of `opacity`.
+- Checked: `npx tsc -b`, `vite build`, `./gradlew test --rerun` 12/12; no hex
+  colour in our files; `main.tsx` unchanged. In the browser: list → register
+  with a future date → "decisionDate must not be in the future" verbatim →
+  corrected → saved and visible in the list (count 6) → its page with Mari
+  Kask from the registry. All three card states seen, the unavailable one
+  with the backend's registry URL pointing nowhere. Before / after
+  screenshots of all six screens, in the light colour scheme.
+- Specification § UI rewritten for the theme and the new elements.
+
+**What the agent got wrong, and how it was corrected**
+
+- The first "before" screenshots were taken in the preview pane's dark
+  colour scheme — the page sets no background, so it showed dark around the
+  cards and the metadata looked unreadable. Not the theme: the same in
+  TalTech, and light in a normal browser. Retaken in the light scheme, so
+  before and after compare fairly. Then a second set came out at 320×200
+  because the agent scaled them down to save effort — retaken at full size.
+- The complainant card's first version put the badge in the card header,
+  which cut the title to "Compla…", and used `AppDescriptions`, which did
+  not match the metadata card beside it. Moved the badge into the body and
+  used `FieldItem` like the metadata.
+- `AppAlert` was given the deprecated `message` prop (antd warned in the
+  console); changed to `title`.
+- With the detail panel open, the list's description line was cut off and
+  hid the count at its end; the count now leads the line.
+- One click on Register did nothing during the scenario; a second worked.
+  Investigated: not reproduced — the form validated on the first click when
+  tried again. Most likely the click landed on a notification that was still
+  fading out over the Register button (notifications open top-right, over
+  the header actions). Left as an observation, not a fix.
+
+**Decided after review**
+
+- I asked why the final result has an Animals tab at all. The agent's
+  answer: animals is the course's worked example, and our component depends
+  on code that lives in it (the imitated population registry, the shared
+  `ApiErrorHandler`, the mock-auth controller, the master changelog), so it
+  stays; only the menu is a UI choice. I chose: Complaints first and the
+  landing page (`/` → `/complaints`), Animals kept beside it for comparison.
+- The tab title: I allowed the one-line change in `main.tsx` —
+  `appName="ITE4120 Registers"` — and the same text in `index.html`'s
+  `<title>`, so the tab no longer flashes the old name while loading.
+  Checked in the browser: `/` opens Complaints, the menu reads
+  Complaints | Animals, the title is "ITE4120 Registers" on every page.
