@@ -134,3 +134,49 @@ Time spent: __ h
   guessing the padding.
 - The branch starts from `spec/complaints`, not `main`, because PR #1 is not
   merged yet and both touch this diary.
+
+### Stage 3 — business tests, then the API (22 November)
+
+**Work completed**
+
+- `ComplaintBusinessRulesIT` written first: the three business tests of
+  COMPLAINTS.01, in the specification's order and words.
+- Red: with only the model and a service skeleton whose methods throw
+  "not implemented", all three failed (`3 tests completed, 3 failed`).
+- The API in the animals shape: `ComplaintController` (HTTP only, `@Operation`
+  / `@ApiResponse`) → `ComplaintService` (the rules) → `ComplaintRepository`
+  (`BaseRepository`, `SqlBuilder`, `PgBeanProcessor`); `ComplaintRequest` for
+  Bean Validation; `ComplaintQueryParams`; `/decision-types`. The registry
+  endpoint `/complainant` belongs to stage 4.
+- Green: `./gradlew test` 8/8 (3 complaints + 5 of the example);
+  `check-changesets` clean.
+- Checked by hand over HTTP: list with `{data, meta}`, filter, search and sort;
+  400 on an unknown sort key; 201 + `Location`; 409 duplicate; 400 future
+  date, unknown type, malformed request, changed case number; update bumps
+  `sysVersion` and records the signed-in user; 204 on withdraw, then 404;
+  401 without a token; all paths in Swagger.
+- One addition over the example: if two registrations race past the
+  "case number free" check, the unique index's `DuplicateKeyException` is
+  turned into the same 409 instead of a 500.
+
+**What I asked the agent**
+
+- To write the tests before the implementation and show me them failing.
+
+**What the agent got wrong, and how it was corrected**
+
+- The red run was weaker than it looked for tests 2 and 3: they failed in
+  their *Given* step (`create` not implemented), not on their own assertions.
+  Only test 1 failed on the rule it checks. Accepted as is — with a skeleton
+  nothing else is possible — but noted honestly.
+- The request's validation messages were left to Bean Validation's defaults.
+  On my Russian-locale Mac the API answered "caseNumber: не должно быть
+  пустым", which the UI would show verbatim. The tests did not catch it (CI's
+  locale is English); the manual HTTP check did. Fixed by giving every
+  constraint an explicit English message; full test run repeated afterwards.
+
+**Noticed, not changed**
+
+- The shared `ApiErrorHandler` (in `animals/`, not ours to edit) leaves
+  "Not Found: " at the start of a 404 detail, e.g. "Not Found: complaint 1060
+  not found". The animals endpoints answer the same way.
