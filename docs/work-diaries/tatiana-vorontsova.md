@@ -101,4 +101,36 @@ Time spent: __ h
 
 - The legal reference in the story's Context (GDPR Art. 22(3)) is still not
   checked against the source text.
-- Stage 1 pull request: branch `spec/complaints`, commit, push to my fork.
+- Stage 1 pull request opened in my fork (#1); Verify running.
+
+### Stage 2 — data layer (22 November)
+
+**Work completed**
+
+- Schema `complaints` and changesets 01 `decision_type` (with its seed, no
+  context), 02 `complaint`, 03 `handling_step`, 90 demo data under
+  `context:demo`; the component's `changelog.xml` and one `<include>` in the
+  master changelog. Same shape as the animals files, line for line.
+- Demo complaints use the three people the imitated registry knows, plus one
+  code (60101010007) it does not know, to show the "not found" answer later.
+- Checked: `scripts/check-changesets` clean; `./gradlew test` green, with
+  every complaints changeset applied to an empty database by Testcontainers;
+  the backend restarted on the local database, rows present, `sys_*` filled by
+  the trigger. In a rolled-back transaction the database refused a duplicate
+  active case number, a 10-digit personal code, a missing complainant, an
+  unknown decision type and an unknown step type, and accepted a withdrawn
+  complaint's case number again.
+
+**What I asked the agent**
+
+- To build the data layer from the confirmed specification and show me the
+  constraints working, not just the tests passing.
+
+**What the agent got wrong, and how it was corrected**
+
+- Nothing in this stage needed correcting. One thing caught before it went
+  wrong: the column `complainant_isikukood` is longer than the 20-character
+  alignment width, so the agent read the checker's rule first instead of
+  guessing the padding.
+- The branch starts from `spec/complaints`, not `main`, because PR #1 is not
+  merged yet and both touch this diary.
