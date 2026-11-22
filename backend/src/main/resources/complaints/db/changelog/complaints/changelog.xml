@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The complaints component changelog, in the shape of the animals one.
+
+  A released changeset is IMMUTABLE: a later change to these tables is a new
+  numbered file appended here, never an edit of 01-03.
+-->
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.27.xsd">
+
+  <include file="complaints/db/changelog/complaints/complaints-schema.sql"/>
+  <include file="complaints/db/changelog/complaints/01-decision-type.sql"/>
+  <include file="complaints/db/changelog/complaints/02-complaint.sql"/>
+  <include file="complaints/db/changelog/complaints/03-handling-step.sql"/>
+  <include file="complaints/db/changelog/complaints/90-demo-data.sql"/>
+
+</databaseChangeLog>
