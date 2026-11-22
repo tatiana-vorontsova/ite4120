@@ -1,5 +1,6 @@
 package ee.taltech.ite4120.complaints.api;
 
+import ee.taltech.ite4120.complaints.complainantregistry.ComplainantInfo;
 import ee.taltech.ite4120.complaints.dto.ComplaintQueryParams;
 import ee.taltech.ite4120.complaints.model.Complaint;
 import ee.taltech.ite4120.complaints.model.DecisionType;
@@ -79,6 +80,17 @@ public class ComplaintController {
     public ResponseEntity<Void> withdraw(@PathVariable Long id) {
         service.withdraw(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "The complainant's current name and address, from the population registry",
+            description = "Looked up live through ComplainantRegistryAdapter, never stored. "
+                    + "Fail open: only this endpoint depends on the registry.")
+    @ApiResponse(responseCode = "200", description = "The complainant")
+    @ApiResponse(responseCode = "404", description = "No active complaint with that id, or the registry does not know the personal code")
+    @ApiResponse(responseCode = "502", description = "The population registry is unavailable — the complaint itself is unaffected")
+    @GetMapping("/{id}/complainant")
+    public ComplainantInfo complainant(@PathVariable Long id) {
+        return service.complainant(id);
     }
 
     @Operation(summary = "Decision type reference list")
