@@ -50,3 +50,10 @@ animals:
     url: http://localhost:18440/mock-registry
     # The built-in imitated registry; enabled only in the local profile.
     mock-server: false
+
+complaints:
+  complainant-registry:
+    # The population registry for complaint lookups. Locally the same imitated
+    # registry the animals example serves. Point it nowhere to see fail open:
+    # /api/complaints/{id}/complainant answers 502, everything else works.
+    url: http://localhost:18440/mock-registry

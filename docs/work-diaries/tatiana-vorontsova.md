@@ -180,3 +180,47 @@ Time spent: __ h
 - The shared `ApiErrorHandler` (in `animals/`, not ours to edit) leaves
   "Not Found: " at the start of a 404 detail, e.g. "Not Found: complaint 1060
   not found". The animals endpoints answer the same way.
+
+### Stage 4 — population registry adapter (22 November)
+
+**Work completed**
+
+- `complaints/complainantregistry/`: `ComplainantRegistryAdapter` (interface),
+  `HttpComplainantRegistryAdapter` with the one mapper, the wire record
+  `RrPersonResponse` with the registry's Estonian names (own copy — the
+  component depends on the registry's contract, not on the animals
+  component), `ComplainantInfo` in our names, `ComplainantRegistryConfig`;
+  the URL in `application.yml` (`complaints.complainant-registry.url`), locally
+  the same imitated registry as the example.
+- `GET /api/complaints/{id}/complainant`. Two differences from the example,
+  both deliberate: the lookup returns `Optional` instead of `null`, so a miss
+  is visible in the signature; and the call is made in the service, not the
+  controller (AGENTS.md: logic in a controller is a defect). It is the only
+  service method that calls the registry — that is the fail-open policy.
+- `ComplaintErrorHandler` adds the two lookup outcomes to the shared error
+  handler: 404 "complainant not found in the population registry" and 502
+  "population registry unavailable"; it overrides nothing.
+- `HttpComplainantRegistryAdapterTest`: four outcomes against a registry
+  served in-process — mapped, miss, fault, unreachable.
+- Checked: `./gradlew test` 12/12, `check-changesets` clean. By hand: Jaan
+  Tamm for CMP-2026-0001 (200), the unknown complainant of CMP-2026-0004
+  (404, own detail), a missing complaint (plain 404). Then the backend
+  restarted with the registry URL pointing at a closed port: `/complainant`
+  answered 502, while read, list, register (201), update and withdraw (204)
+  all worked — fail open, seen working.
+
+**What I asked the agent**
+
+- To build the adapter and show me the failure policy working, not only
+  described.
+
+**What the agent got wrong, and how it was corrected**
+
+- The 502 detail read "population registry unreachable: null" — a refused
+  connection has no message, and the adapter (copied from the example's
+  shape) appended it blindly. Found in the manual registry-down check, not by
+  a test. Fixed in the adapter; the unreachable test now also asserts the
+  detail contains no "null"; checked again live.
+- The adapter tests were written together with the adapter, not before it.
+  They are not business tests from the specification, so the "watched red"
+  rule does not strictly apply, but they were not seen failing first.

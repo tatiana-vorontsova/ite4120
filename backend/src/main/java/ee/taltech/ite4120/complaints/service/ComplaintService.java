@@ -1,5 +1,7 @@
 package ee.taltech.ite4120.complaints.service;
 
+import ee.taltech.ite4120.complaints.complainantregistry.ComplainantInfo;
+import ee.taltech.ite4120.complaints.complainantregistry.ComplainantRegistryAdapter;
 import ee.taltech.ite4120.complaints.dto.ComplaintQueryParams;
 import ee.taltech.ite4120.complaints.model.Complaint;
 import ee.taltech.ite4120.complaints.model.DecisionType;
@@ -18,17 +20,19 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Business rules of the complaints register — exactly the rules written as
  * business tests in docs/src/specifications/COMPLAINTS.01, executable in
- * ComplaintBusinessRulesIT. No rule here calls the population registry: the
- * failure policy is fail open, so registering, reading, updating and
- * withdrawing never depend on it.
+ * ComplaintBusinessRulesIT. Only {@link #complainant} calls the population
+ * registry: the failure policy is fail open, so registering, reading,
+ * updating and withdrawing never depend on it.
  */
 @Service
 public class ComplaintService {
 
     private final ComplaintRepository repository;
+    private final ComplainantRegistryAdapter complainantRegistry;
 
-    public ComplaintService(ComplaintRepository repository) {
+    public ComplaintService(ComplaintRepository repository, ComplainantRegistryAdapter complainantRegistry) {
         this.repository = repository;
+        this.complainantRegistry = complainantRegistry;
     }
 
     public QueryResult<Complaint> search(ComplaintQueryParams params) {
@@ -82,6 +86,18 @@ public class ComplaintService {
         if (!repository.withdraw(id)) {
             throw new NotFoundException("complaint " + id + " not found");
         }
+    }
+
+    /**
+     * The complainant's current name and address, asked from the population
+     * registry now — never stored. The ONLY method here that calls the registry:
+     * that is the fail-open policy. When the registry is down this one call
+     * fails (502); registering, reading, updating and withdrawing do not notice.
+     */
+    public ComplainantInfo complainant(Long id) {
+        Complaint complaint = require(id);
+        return complainantRegistry.lookup(complaint.getComplainantIsikukood())
+                .orElseThrow(ComplainantUnknownException::new);
     }
 
     public List<DecisionType> decisionTypes() {
