@@ -12,10 +12,13 @@ contests it — and no complaint is lost, or registered twice.
 
 Public authorities increasingly take decisions by algorithm: benefit
 eligibility, tax assessments, permits, risk scores. A person subject to such a
-decision has the right to obtain human intervention and to contest it
-(GDPR Art. 22(3)). The complaint is where that review begins, so the first duty
-of the authority is modest and strict: record every complaint once, under a
-unique case number, and be able to find it again.
+decision is entitled to safeguards, at least human intervention and the right
+to contest it: GDPR Art. 22(3) for decisions based on contract or consent; for
+decisions authorised by law — how public authorities decide — Art. 22(2)(b)
+requires that law to lay down suitable safeguards, and Recital 71 names the
+right to challenge the decision among them. The complaint is where that review
+begins, so the first duty of the authority is modest and strict: record every
+complaint once, under a unique case number, and be able to find it again.
 
 The complainant is **not** stored as free text: the register keeps only the
 personal code (isikukood) and asks the population registry — over X-Road in
