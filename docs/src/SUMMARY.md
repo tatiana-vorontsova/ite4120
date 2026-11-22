@@ -8,3 +8,5 @@
 - [Manual · Frontend](manuals/frontend.md)
 - [User story · ANIMALS-US-001](user-stories/ANIMALS-US-001.md)
 - [Specification · ANIMALS.01](specifications/ANIMALS.01-animal-register.md)
+- [User story · COMPLAINTS-US-001](user-stories/COMPLAINTS-US-001.md)
+- [Specification · COMPLAINTS.01](specifications/COMPLAINTS.01-complaint-register.md)
