@@ -5,7 +5,7 @@ Working alone. AI agent: Claude.
 
 ## 14 November 2026
 
-Time spent: __ h
+Time spent: 3 h
 
 **Work completed**
 
@@ -42,7 +42,7 @@ Time spent: __ h
 
 ## 22 November 2026
 
-Time spent: __ h
+Time spent: 5 h (the whole day, design stage included)
 
 **Work completed**
 
@@ -326,7 +326,7 @@ Time spent: __ h
 
 ### Design stage — TEDI theme and screen polish (22 November)
 
-Time spent: __ h
+Time spent: included in the 5 h of 22 November
 
 **What I asked the agent**
 
@@ -407,3 +407,28 @@ Time spent: __ h
   `<title>`, so the tab no longer flashes the old name while loading.
   Checked in the browser: `/` opens Complaints, the menu reads
   Complaints | Animals, the title is "ITE4120 Registers" on every page.
+
+### Defence preparation (22 November)
+
+**Work completed**
+
+- The legal reference in the user story's Context checked against the
+  regulation's official text (EUR-Lex, Regulation (EU) 2016/679). Finding:
+  Art. 22(3) — "at least the right to obtain human intervention … and to
+  contest the decision" — applies only to the cases of Art. 22(2)(a)
+  (contract) and (c) (explicit consent). The decisions this register is
+  about — benefits, tax, permits, risk scores — are taken by public
+  authorities under law, i.e. Art. 22(2)(b), where the authorising law must
+  itself lay down suitable safeguards; Recital 71 says such processing "in
+  any case" needs safeguards including human intervention and the right to
+  challenge the decision. The conclusion of the Context stands; its legal
+  basis was wrong for our case. Rewritten accordingly; I approved the
+  wording.
+
+**What the agent got wrong, and how it was corrected**
+
+- The draft of 14 November, written by the agent, cited Art. 22(3) as the
+  source of the right to contest an automated public-sector decision. It is
+  the source only for contract- and consent-based decisions. Found by reading
+  the article in the official text rather than from memory, before the
+  defence.
